@@ -1,0 +1,210 @@
+openapi: 3.0.0
+info:
+  description: |
+    This is the documentation in-progress of farchain.  FIXME link(s).
+  version: "1.0.0"
+  title: farbchain
+  contact:
+    email: fixme@fixme.fixme
+  license:
+    name: Apache 2.0
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+servers:
+  - description: FIXME
+    url: https://virtserver.swaggerhub.com/dbqpbpdq/farbchain/1.0.0
+  - url: 'https://petstore.swagger.io/v2'
+paths:
+  /:
+    get:
+      summary: Basic, static description of the service,
+      operationId: hello
+      responses:
+        '200':
+          description: successful operation
+  /config/:
+    get:
+      summary: Returns configuration, usually static until restart
+      description: Returns screen resolution, hash, etc
+      operationId: config
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Config'
+  /stats/:
+    get:
+      summary: Returns some statistics
+      description: Returns whatever
+      operationId: stats
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: string
+  /pixel/{x}/{y}/:
+    parameters:
+      - name: x
+        in: path
+        description: x coordinate of the pixel
+        required: true
+        schema:
+          type: integer
+          format: uint16
+      - name: y
+        in: path
+        description: y coordinate of the pixel
+        required: true
+        schema:
+          type: integer
+          format: uint16
+    get:
+      summary: Returns all current information about the selected pixel
+      description: Returns rgb state, difficulty, and last block ID
+      operationId: pixel_get
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PixelGet'
+        '404':
+          description: outside of screen
+    put:
+      summary: Attempt to set the pixel
+      description: Given the desired new difficulty and nonce, set new rgb state
+      operationId: pixel_set
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PixelPut'
+      responses:
+        '201':
+          description: successful operation
+        '403':
+          description: config changed
+        '404':
+          description: outside of screen
+        '409':
+          description: conflict with concurrent update
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PixelGet'
+  /capture/:
+    get:
+      summary: Request authorization for a screen capture
+      description: Returns token and difficulty for a screen capture
+      operationId: capture_request
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CaptureGet'
+        '501':
+          description: not implemented / not enabled
+    post:
+      summary: Make a screen capture
+      operationId: capture
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CapturePost'
+      responses:
+        '200':
+          description: successful operation
+          content:
+            'image/png':
+              schema:
+                type: string
+                format: binary
+        '403':
+          description: config changed
+        '409':
+          description: conflict with concurrent update
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CaptureGet'
+        '501':
+          description: not implemented / not enabled
+components:
+  schemas:
+    Config:
+      type: object
+      properties:
+        width:
+          type: integer
+          format: int16
+          description: Width of the canvas, in pixels
+        height:
+          type: integer
+          format: int16
+          description: Height of the canvas, in pixels
+        hash:
+          type: string
+          description: Element of python's `hashlib.algorithms_guaranteed`
+        pixelPenalty:
+          type: integer
+          format: int8
+          description: The penalty-difficulty to request a single pixel
+        capturePenalty:
+          type: integer
+          format: int8
+          description: The difficulty to request the entire canvas
+    PixelGet:
+      type: object
+      description: rgb state, difficulty, and last block ID
+      properties:
+        rgb:
+          type: integer
+          format: int32
+        requiredDifficulty:
+          type: integer
+          format: int8
+        lastBlock:
+          type: string
+          format: hex
+    PixelPut:
+      type: object
+      description: Given the desired new difficulty and nonce, set new rgb state
+      properties:
+        lastBlock:
+          type: string
+          format: hex
+        nonce:
+          type: string
+          format: hex
+        newDifficulty:
+          type: integer
+          format: int8
+        rgb:
+          type: integer
+          format: int32
+    CaptureGet:
+      type: object
+      description: token and difficulty for a screen capture
+      properties:
+        challenge:
+          type: string
+          format: hex
+        requiredDifficulty:
+          type: integer
+          format: int8
+    CapturePost:
+      type: object
+      properties:
+        challenge:
+          type: string
+          format: hex
+        nonce:
+          type: string
+          format: hex

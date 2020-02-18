@@ -87,7 +87,7 @@ paths:
         '201':
           description: successful operation
         '403':
-          description: config changed
+          description: config changed, nonce is bad, or insufficient difficulty
         '404':
           description: outside of screen
         '409':
@@ -96,6 +96,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PixelGet'
+  /latest/:
+    get:
+      summary: Request the latest screen capture, accepting some delay
+      operationId: capture_cached
+      responses:
+        '200':
+          description: successful operation
+          content:
+            'image/png':
+              schema:
+                type: string
+                format: binary
   /capture/:
     get:
       summary: Request authorization for a screen capture

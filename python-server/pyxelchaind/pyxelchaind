@@ -10,7 +10,7 @@ import secrets
 import struct
 import sys
 
-app = flask.Flask('farbchain')
+app = flask.Flask('pixelchain')
 
 
 def log_changes(payload):
@@ -35,7 +35,7 @@ def check_block(last_block_bytes, nonce_bytes, payload, required_difficulty):
     # last_block is server-assigned, payload has fixed length, so in
     # theory parsing would be possible.  This is nice as it guarantees
     # that there is no confusion attack possible.
-    block_bytes = app.fc_config.hashfn(hash_msg).digest()
+    block_bytes = app.pc_config.hashfn(hash_msg).digest()
     achieved_difficulty = 0
     for b in block_bytes:
         if b < 0x01:  # i.e. `b == 0x00`
@@ -79,9 +79,9 @@ class Pixel:
 
 
 class Canvas:
-    def __init__(self, fc_config):
-        self.fc_config = fc_config
-        self.data = [Pixel(x, y, fc_config.init_rgb) for y in range(self.fc_config.resolution[1]) for x in range(self.fc_config.resolution[0])]
+    def __init__(self, pc_config):
+        self.pc_config = pc_config
+        self.data = [Pixel(x, y, pc_config.init_rgb) for y in range(self.pc_config.resolution[1]) for x in range(self.pc_config.resolution[0])]
         self.update_png()
         self.pending_pokes = 0
         self.estimated_work = 0
@@ -92,14 +92,14 @@ class Canvas:
 
     def update_png(self):
         self.pending_pokes = 0
-        img = Image.new('RGB', self.fc_config.resolution)
+        img = Image.new('RGB', self.pc_config.resolution)
         img.putdata([p.rgb for p in self.data])
         buf = io.BytesIO()
         img.save(buf, format='PNG')
         self.png = buf.getvalue()
 
     def get_pixel(self, x, y):
-        w, h = self.fc_config.resolution
+        w, h = self.pc_config.resolution
         if 0 <= x < w and 0 <= y < h:
             return self.data[y * w + x]
         else:
@@ -109,7 +109,7 @@ class Canvas:
         self.pending_pokes += 1
         self.updates += 1
         self.estimated_work += 1 << difficulty
-        if self.pending_pokes >= app.fc_config.cache_latency_pixels:
+        if self.pending_pokes >= app.pc_config.cache_latency_pixels:
             self.update_png()
 
 
@@ -121,11 +121,11 @@ def api_hello_world():
 @app.route('/config/')
 def api_config():
     return flask.json.jsonify(
-        width=app.fc_config.resolution[0],
-        height=app.fc_config.resolution[1],
-        hash=app.fc_config.hash,
-        pixelPenalty=app.fc_config.pixel_penalty,
-        capturePenalty=app.fc_config.capture_penalty,
+        width=app.pc_config.resolution[0],
+        height=app.pc_config.resolution[1],
+        hash=app.pc_config.hash,
+        pixelPenalty=app.pc_config.pixel_penalty,
+        capturePenalty=app.pc_config.capture_penalty,
     )
 
 
@@ -146,7 +146,7 @@ def api_pixel(x=-1, y=-1):
     px = app.canvas.get_pixel(x, y)
     if px is None:
         flask.abort(404)
-    required_difficulty = app.fc_config.pixel_penalty + px.difficulty
+    required_difficulty = app.pc_config.pixel_penalty + px.difficulty
     response = flask.json.jsonify(
         rgb=px.rgb_int32(),
         requiredDifficulty=required_difficulty,
@@ -236,7 +236,7 @@ def parse_rgb(rgb_str):
 
 def make_parser(progname):
     parser = argparse.ArgumentParser(
-        prog=progname, description='Starts a new farbchain server.')
+        prog=progname, description='Starts a new pixelchain server.')
     parser.add_argument('-r', '--resolution', default='640x480',
         metavar='WxH', type=parse_resolution,
         help='The size of the screen (defaults to 640x480)')
@@ -254,17 +254,17 @@ def make_parser(progname):
 
 
 def postprocess_app():
-    log_changes(app.fc_config)
-    app.fc_config.hashfn = getattr(hashlib, app.fc_config.hash)
-    app.canvas = Canvas(app.fc_config)
+    log_changes(app.pc_config)
+    app.pc_config.hashfn = getattr(hashlib, app.pc_config.hash)
+    app.canvas = Canvas(app.pc_config)
 
 
 def run():
     global app
-    app.fc_config = make_parser(sys.argv[0]).parse_args(sys.argv[1:])
+    app.pc_config = make_parser(sys.argv[0]).parse_args(sys.argv[1:])
     print('Generating image ...')
     postprocess_app()    
-    print('Running with config:\n{}'.format(app.fc_config))
+    print('Running with config:\n{}'.format(app.pc_config))
     app.run(port=8080)
 
 

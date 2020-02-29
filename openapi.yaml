@@ -1,9 +1,9 @@
 openapi: 3.0.0
 info:
   description: |
-    This is the documentation in-progress of farchain.  FIXME link(s).
+    This is the documentation in-progress of pixelchain.  FIXME link(s).
   version: "1.0.0"
-  title: farbchain
+  title: pixelchain
   contact:
     email: fixme@fixme.fixme
   license:
@@ -11,7 +11,7 @@ info:
     url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
 servers:
   - description: FIXME
-    url: https://virtserver.swaggerhub.com/dbqpbpdq/farbchain/1.0.0
+    url: https://virtserver.swaggerhub.com/dbqpbpdq/pixelchain/1.0.0
   - url: 'https://petstore.swagger.io/v2'
 paths:
   /:

@@ -171,7 +171,7 @@ def api_stats():
     )
 
 
-@app.route('/pixel/<int:x>/<int:y>/', methods=['GET', 'PUT'])
+@app.route('/pixel/<int:x>/<int:y>/', methods=['GET', 'POST'])
 def api_pixel(x=-1, y=-1):
     px = app.canvas.get_pixel(x, y)
     if px is None:
@@ -186,7 +186,7 @@ def api_pixel(x=-1, y=-1):
     if flask.request.method == 'GET':
         return response
 
-    if flask.request.method != 'PUT':
+    if flask.request.method != 'POST':
         flask.abort(400)
 
     # Alrighty!  Let's see whether this makes sense:

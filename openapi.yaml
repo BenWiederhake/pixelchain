@@ -108,46 +108,6 @@ paths:
               schema:
                 type: string
                 format: binary
-  /capture/:
-    get:
-      summary: Request authorization for a screen capture
-      description: Returns token and difficulty for a screen capture
-      operationId: capture_request
-      responses:
-        '200':
-          description: successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CaptureGet'
-        '501':
-          description: not implemented / not enabled
-    post:
-      summary: Make a screen capture
-      operationId: capture
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CapturePost'
-      responses:
-        '200':
-          description: successful operation
-          content:
-            'image/png':
-              schema:
-                type: string
-                format: binary
-        '403':
-          description: config changed
-        '409':
-          description: conflict with concurrent update
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CaptureGet'
-        '501':
-          description: not implemented / not enabled
 components:
   schemas:
     Config:
@@ -163,15 +123,11 @@ components:
           description: Height of the canvas, in pixels
         hash:
           type: string
-          description: Element of python's `hashlib.algorithms_guaranteed`
+          description: Any fixed-length hash function from python's `hashlib.algorithms_guaranteed`
         pixelPenalty:
           type: integer
-          format: int8
+          format: int64
           description: The penalty-difficulty to request a single pixel
-        capturePenalty:
-          type: integer
-          format: int8
-          description: The difficulty to request the entire canvas
     PixelGet:
       type: object
       description: rgb state, difficulty, and last block ID
@@ -181,7 +137,7 @@ components:
           format: int32
         requiredDifficulty:
           type: integer
-          format: int8
+          format: int64
         lastBlock:
           type: string
           format: hex
@@ -197,26 +153,7 @@ components:
           format: hex
         newDifficulty:
           type: integer
-          format: int8
+          format: int64
         rgb:
           type: integer
           format: int32
-    CaptureGet:
-      type: object
-      description: token and difficulty for a screen capture
-      properties:
-        challenge:
-          type: string
-          format: hex
-        requiredDifficulty:
-          type: integer
-          format: int8
-    CapturePost:
-      type: object
-      properties:
-        challenge:
-          type: string
-          format: hex
-        nonce:
-          type: string
-          format: hex

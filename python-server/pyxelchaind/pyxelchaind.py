@@ -9,6 +9,22 @@ import io
 import secrets
 import struct
 import sys
+import time
+
+ALGOS_ALLOWED = {
+    "blake2s",
+    "sha3_256",
+    "sha1",
+    "sha3_512",
+    "sha384",
+    "sha3_384",
+    "sha256",
+    "sha3_224",
+    "md5",
+    "sha512",
+    "blake2b",
+    "sha224",
+}
 
 app = flask.Flask('pixelchain')
 
@@ -63,9 +79,9 @@ def check_block(last_block_bytes, nonce_bytes, payload, required_difficulty):
 
 
 class Pixel:
-    def __init__(self, x, y, init_rgb):
+    def __init__(self, x, y, h, init_rgb):
         self.rgb = init_rgb
-        self.last_block_bytes = secrets.token_bytes(8)
+        self.last_block_bytes = h(secrets.token_bytes(8)).digest()
         self.difficulty = 0
         log_changes(dict(x=x, y=y, rgb=init_rgb, last_block_bytes=self.last_block_bytes, diff=self.difficulty))
 
@@ -81,16 +97,33 @@ class Pixel:
 class Canvas:
     def __init__(self, pc_config):
         self.pc_config = pc_config
-        self.data = [Pixel(x, y, pc_config.init_rgb) for y in range(self.pc_config.resolution[1]) for x in range(self.pc_config.resolution[0])]
-        self.update_png()
-        self.pending_pokes = 0
+        self.data = [Pixel(x, y, pc_config.hashfn, pc_config.init_rgb)
+                     for y in range(self.pc_config.resolution[1])
+                     for x in range(self.pc_config.resolution[0])]
         self.estimated_work = 0
         self.updates = 0
+        self.pending_pokes = 1
+
+        self.png = None
+        self.last_png_update = 0
+        self.maybe_update_png()
+        assert self.png is not None
 
     def resize(self, new_size):
         raise NotImplementedError()
 
-    def update_png(self):
+    def maybe_update_png(self):
+        if self.pending_pokes == 0:
+            return
+        now = time.time()
+        print('{} pokes pending, age {}'.format(
+            self.pending_pokes, now - self.last_png_update))
+        if self.pending_pokes >= app.pc_config.cache_latency_pixels or \
+                now - self.last_png_update >= app.pc_config.cache_latency_s:
+            self._update_png()
+            self.last_png_update = now
+
+    def _update_png(self):
         self.pending_pokes = 0
         img = Image.new('RGB', self.pc_config.resolution)
         img.putdata([p.rgb for p in self.data])
@@ -109,8 +142,6 @@ class Canvas:
         self.pending_pokes += 1
         self.updates += 1
         self.estimated_work += 1 << difficulty
-        if self.pending_pokes >= app.pc_config.cache_latency_pixels:
-            self.update_png()
 
 
 @app.route('/')
@@ -125,7 +156,6 @@ def api_config():
         height=app.pc_config.resolution[1],
         hash=app.pc_config.hash,
         pixelPenalty=app.pc_config.pixel_penalty,
-        capturePenalty=app.pc_config.capture_penalty,
     )
 
 
@@ -199,13 +229,8 @@ def api_pixel(x=-1, y=-1):
 
 @app.route('/latest/', methods=['GET', 'POST'])
 def api_latest():
-    app.canvas.update_png()  # FIXME: Remove in production
+    app.canvas.maybe_update_png()
     return flask.Response(app.canvas.png, mimetype='image/png')
-
-
-@app.route('/capture/', methods=['GET', 'POST'])
-def api_capture():
-    flask.abort(501)  # Not implemented
 
 
 def parse_resolution(r):
@@ -240,16 +265,16 @@ def make_parser(progname):
     parser.add_argument('-r', '--resolution', default='640x480',
         metavar='WxH', type=parse_resolution,
         help='The size of the screen (defaults to 640x480)')
-    parser.add_argument('--hash', default='sha256', choices=hashlib.algorithms_available,
-        help='The hash function to be used (defaults to sha256)')
+    parser.add_argument('--hash', default='sha256', choices=ALGOS_ALLOWED,
+        help='The fixed-length hash function to be used (defaults to sha256)')
     parser.add_argument('--init-rgb', default='000000', type=parse_rgb,
         help='The hash function to be used (defaults to sha256)')
     parser.add_argument('--pixel-penalty', default=8, type=int,
         help='Additional difficulty when setting a pixel (defaults to 8)')
-    parser.add_argument('--capture-penalty', default=20, type=int,
-        help='Difficulty when getting a canvas capture, should be less that log2(W*H) (defaults to 20)')
     parser.add_argument('--cache-latency-pixels', default=200, type=int,
-        help='When to automatically regenerate the screenshot (defaults to 200)')
+        help='When to automatically regenerate the screenshot (defaults to 200 updates)')
+    parser.add_argument('--cache-latency-s', default=5, type=float,
+        help='When to automatically regenerate the screenshot (defaults to 5.0 s)')
     return parser
 
 

@@ -1,4 +1,4 @@
-# farbchain
+# pixelchain
 
 > Colors in a block-ish chain.  Like pixelflut, but slower.
 
@@ -66,8 +66,8 @@ Here are some things this project will definitely not support:
 
 Here are things that I won't implement, but you might find nice:
 * Logging which updates are processed in which order, or even better: Properly outputting the "farb-blockchain" to a file or something.
-* Fancy quotas: the idea is to adjust the difficulties such that farbchain is CPU-bound on the client side, so quotas should not be necessary.
+* Fancy quotas: the idea is to adjust the difficulties such that pixelchain is CPU-bound on the client side, so quotas should not be necessary.
 
 ## Contribute
 
-Feel free to dive in! [Open an issue](https://github.com/BenWiederhake/farbchain/issues/new) or submit PRs.
+Feel free to dive in! [Open an issue](https://github.com/BenWiederhake/pixelchain/issues/new) or submit PRs.

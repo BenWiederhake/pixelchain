@@ -28,6 +28,8 @@ ALGOS_ALLOWED = {
 
 app = flask.Flask('pixelchain')
 
+POSTFIX_RGB = '_rgb.png'
+
 
 def log_changes(payload):
     # TODO: Do some clever logging here?
@@ -97,9 +99,7 @@ class Pixel:
 class Canvas:
     def __init__(self, pc_config):
         self.pc_config = pc_config
-        self.data = [Pixel(x, y, pc_config.hashfn, pc_config.init_rgb)
-                     for y in range(self.pc_config.resolution[1])
-                     for x in range(self.pc_config.resolution[0])]
+        self._load_data()
         self.estimated_work = 0
         self.updates = 0
         self.pending_pokes = 0
@@ -109,8 +109,19 @@ class Canvas:
         self._update_png()
         assert self.png is not None
 
-    def resize(self, new_size):
-        raise NotImplementedError()
+    def _load_data(self):
+        if self.pc_config.reload:
+            img = Image.open(self.pc_config.reload + POSTFIX_RGB)
+            img = img.convert('RGB')  # Just in cast
+            self.pc_config.resolution = img.size
+            print('(Overwriting init_rgb to given file; overwriting resolution to {})'.format(img.size))
+            self.data = [Pixel(x, y, self.pc_config.hashfn, img.getpixel((x, y)))
+                         for y in range(self.pc_config.resolution[1])
+                         for x in range(self.pc_config.resolution[0])]
+        else:
+            self.data = [Pixel(x, y, self.pc_config.hashfn, self.pc_config.init_rgb)
+                         for y in range(self.pc_config.resolution[1])
+                         for x in range(self.pc_config.resolution[0])]
 
     def maybe_update_png(self):
         if self.pending_pokes == 0:
@@ -130,6 +141,12 @@ class Canvas:
         buf = io.BytesIO()
         img.save(buf, format='PNG')
         self.png = buf.getvalue()
+        if self.pc_config.persist:
+            try:
+                img.save(self.pc_config.persist + POSTFIX_RGB)
+                print('Persisted')
+            except BaseException as e:
+                print('WARNING: Cannot save persistence file!', e)
 
     def get_pixel(self, x, y):
         w, h = self.pc_config.resolution
@@ -275,6 +292,10 @@ def make_parser(progname):
         help='When to automatically regenerate the screenshot (defaults to 200 updates)')
     parser.add_argument('--cache-latency-s', default=5, type=float,
         help='When to automatically regenerate the screenshot (defaults to 5.0 s)')
+    parser.add_argument('--persist', default=None, type=str,
+        help='Prefix for persistent files, e.g. "/tmp/pyxd" generates /tmp/pyxd_rgb.png (defaults to None)')
+    parser.add_argument('--reload', default=None, type=str,
+        help='Reload from file-prefix, e.g. "/tmp/pyxd" loads from /tmp/pyxd_rgb.png (defaults to None)')
     return parser
 
 
@@ -287,8 +308,8 @@ def postprocess_app():
 def run():
     global app
     app.pc_config = make_parser(sys.argv[0]).parse_args(sys.argv[1:])
-    print('Generating image ...')
-    postprocess_app()    
+    print('Generating/loading image ...')
+    postprocess_app()
     print('Running with config:\n{}'.format(app.pc_config))
     app.run(port=8080)
 

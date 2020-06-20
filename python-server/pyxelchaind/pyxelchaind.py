@@ -102,11 +102,11 @@ class Canvas:
                      for x in range(self.pc_config.resolution[0])]
         self.estimated_work = 0
         self.updates = 0
-        self.pending_pokes = 1
+        self.pending_pokes = 0
 
         self.png = None
         self.last_png_update = 0
-        self.maybe_update_png()
+        self._update_png()
         assert self.png is not None
 
     def resize(self, new_size):
@@ -146,7 +146,7 @@ class Canvas:
 
 @app.route('/')
 def api_hello_world():
-    return 'Hello World!  FIXME: Insert link to project page here.'
+    return 'Hello, World! This <a href="https://github.com/BenWiederhake/pixelchain/tree/master/python-server">pyxelchaind</a>.'
 
 
 @app.route('/config/')
@@ -268,7 +268,7 @@ def make_parser(progname):
     parser.add_argument('--hash', default='sha256', choices=ALGOS_ALLOWED,
         help='The fixed-length hash function to be used (defaults to sha256)')
     parser.add_argument('--init-rgb', default='000000', type=parse_rgb,
-        help='The hash function to be used (defaults to sha256)')
+        help='The initial RGB value, in hex (defaults to 000000)')
     parser.add_argument('--pixel-penalty', default=8, type=int,
         help='Additional difficulty when setting a pixel (defaults to 8)')
     parser.add_argument('--cache-latency-pixels', default=200, type=int,

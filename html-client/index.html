@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en" class="nojs">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="format-detection" content="telephone=no">
+<meta name="description" content="Pixelchain, where a canvas lives on a blockchain">
+<meta name="keywords" content="pixel, blockchain, collaborative, game">
+<title>Pixelchain</title><!-- There's only one page, so way use many words when few do job? -->
+<link rel="canonical" href="/">
+<!--<link rel="author" href="/humans.txt">-->
+
+<!-- Load favico here? -->
+<!-- Automatic reloads? -->
+<!-- Load js here? -->
+</head>
+<body>
+<h1>Pixelchain</h1>
+<h2>The canvas</h2>
+<p>This is what it currently looks like:</p>
+<img src="/latest/" alt="the latest canvas">
+<h2>Update a pixel (will compute Proof Of Work):</h2>
+<form>
+    <label for="x">X-coordinate:</label>
+    <input type="number" id="x" name="x" value="100"><br />
+    <label for="y">Y-coordinate:</label>
+    <input type="number" id="y" name="y" value="100"><br />
+    <label for="rgb">Desired color:</label>
+    <input type="color" id="setrgb" name="setrgb" value="#808080"><br />
+    <label for="newdiff">New difficulty:</label>
+    <input type="number" id="newdiff" name="newdiff"><br />
+    <input type="submit" id="submit" value="Post (may fail)"><br />
+    <input type="button" id="cancel" value="Cancel computation"><br />
+</form>
+<p id="submission-status">(Could display updates about computation here)</p>
+<h2>The canvas</h2>
+<p id="config">(Could display config here)</p>
+<p id="stats">(Could display stats here)</p>
+</body>
+</html>

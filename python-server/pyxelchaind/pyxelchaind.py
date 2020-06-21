@@ -185,6 +185,7 @@ def api_stats():
         connections='unknown',
         bandwidth_bips='unknown',
         estimated_hps='unknown',
+        estimated_ups='unknown',
     )
 
 

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="nojs">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -7,35 +7,53 @@
 <meta name="format-detection" content="telephone=no">
 <meta name="description" content="Pixelchain, where a canvas lives on a blockchain">
 <meta name="keywords" content="pixel, blockchain, collaborative, game">
+<meta http-equiv="refresh" content="60" />
 <title>Pixelchain</title><!-- There's only one page, so way use many words when few do job? -->
 <link rel="canonical" href="/">
 <!--<link rel="author" href="/humans.txt">-->
+<link rel="apple-touch-icon" href="favicon.png">
+<link rel="shortcut icon" href="favicon.png">
+<!--<link rel="stylesheet" href="the.css">-->
 
-<!-- Load favico here? -->
-<!-- Automatic reloads? -->
-<!-- Load js here? -->
 </head>
 <body>
 <h1>Pixelchain</h1>
 <h2>The canvas</h2>
 <p>This is what it currently looks like:</p>
-<img src="/latest/" alt="the latest canvas">
+<img src="/latest/" alt="(the latest canvas)">
 <h2>Update a pixel (will compute Proof Of Work):</h2>
 <form>
-    <label for="x">X-coordinate:</label>
-    <input type="number" id="x" name="x" value="100"><br />
-    <label for="y">Y-coordinate:</label>
-    <input type="number" id="y" name="y" value="100"><br />
-    <label for="rgb">Desired color:</label>
-    <input type="color" id="setrgb" name="setrgb" value="#808080"><br />
-    <label for="newdiff">New difficulty:</label>
-    <input type="number" id="newdiff" name="newdiff"><br />
-    <input type="submit" id="submit" value="Post (may fail)"><br />
-    <input type="button" id="cancel" value="Cancel computation"><br />
+    <!-- Maybe even allow switching servers, in case that other server doesn't serve this html client? -->
+    <label for="f-x">X-coordinate:</label>
+    <input type="number" id="f-x" value="100"><br />
+    <label for="f-y">Y-coordinate:</label>
+    <input type="number" id="f-y" value="100"><br />
+    <label for="f-rgb">Desired color:</label>
+    <input type="color" id="f-setrgb" value="#808080"><br />
+    <label for="f-newdiff">New difficulty:</label>
+    <input type="number" id="f-newdiff"><br />
+    <button id="f-submit" onclick="trySubmit()">Begin computing/posting</button> <button id="f-cancel" onclick="cancelSubmit()">Cancel</button>
 </form>
 <p id="submission-status">(Could display updates about computation here)</p>
-<h2>The canvas</h2>
-<p id="config">(Could display config here)</p>
-<p id="stats">(Could display stats here)</p>
+<h2>Cool numbers</h2>
+<h3>Canvas configuration</h3>
+<p>
+    Width: <span id="c-width">???</span> pixels<br />
+    Height: <span id="c-height">???</span> pixels<br />
+    Hash algorithm: <span id="c-algo">???</span><br />
+    Base update difficulty: <span id="c-pixdiff">???</span> bits<br />
+</p>
+<h3>Canvas statistics</h3>
+<p>
+    Lagging pixels: <span id="s-lagging">???</span> pixels<br />
+    Connections: <span id="s-connections">???</span><br />
+    Bandwidth: <span id="s-bandwidth">???</span> bits per second<br />
+    Total updates: <span id="s-updates-total">???</span><br />
+    Current updates per second: <span id="s-updates-rate">???</span><br />
+    Total effor (estimated): <span id="s-hashes-total">???</span> hashes<br />
+    Current effort per second: <span id="s-hashes-rate">???</span> hashes per second<br />
+</p>
+
+<!--<script src="the.js"></script>-->
 </body>
 </html>

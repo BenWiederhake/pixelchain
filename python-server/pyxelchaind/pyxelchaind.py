@@ -306,6 +306,34 @@ def postprocess_app():
     app.canvas = Canvas(app.pc_config)
 
 
+# FIXME: Remove this in production
+# print('\n\n\n'.join("@app.route('/{f}')\ndef serve_{i}():\n    return app.send_static_file('{f}')".format(i=i, f=fn) for i, fn in enumerate('app.js favico.ico favico.png index.html sha256.js'.split())))
+
+@app.route('/app.js')
+def serve_0():
+    return app.send_static_file('app.js')
+
+
+@app.route('/favico.ico')
+def serve_1():
+    return app.send_static_file('favico.ico')
+
+
+@app.route('/favico.png')
+def serve_2():
+    return app.send_static_file('favico.png')
+
+
+@app.route('/index.html')
+def serve_3():
+    return app.send_static_file('index.html')
+
+
+@app.route('/sha256.js')
+def serve_4():
+    return app.send_static_file('sha256.js')
+
+
 def run():
     global app
     app.pc_config = make_parser(sys.argv[0]).parse_args(sys.argv[1:])

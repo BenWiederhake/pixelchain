@@ -22,7 +22,6 @@
 <p>This is what it currently looks like:</p>
 <img src="/latest/" alt="(the latest canvas)">
 <h2>Update a pixel (will compute Proof Of Work):</h2>
-<form>
     <!-- Maybe even allow switching servers, in case that other server doesn't serve this html client? -->
     <label for="f-x">X-coordinate:</label>
     <input type="number" id="f-x" value="100"><br />
@@ -33,7 +32,6 @@
     <label for="f-newdiff">New difficulty:</label>
     <input type="number" id="f-newdiff"><br />
     <button id="f-submit" onclick="trySubmit()">Begin computing/posting</button> <button id="f-cancel" onclick="cancelSubmit()">Cancel</button>
-</form>
 <p id="submission-status">(Could display updates about computation here)</p>
 <h2>Cool numbers</h2>
 <h3>Canvas configuration</h3>
@@ -55,6 +53,6 @@
 </p>
 
 <script src="sha256.js"></script>
-<!--<script src="the.js"></script>-->
+<script src="app.js"></script>
 </body>
 </html>

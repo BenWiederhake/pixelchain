@@ -120,7 +120,6 @@ function trySubmit() {
     var pixelUrl = `/pixel/${formdata.x}/${formdata.y}/`;
     fetch(
         new Request(pixelUrl)
-        //new Request(pixelUrl, {method: 'POST', body: '{"A": "B", "C": 42, asdfasdf asdf asdfq2t2h h4}'})
     ).then(response => {
         console.log(response);
         return response.json();
@@ -128,9 +127,35 @@ function trySubmit() {
         console.log("Request result:");
         console.log(responseJson);
         updateFormStatus("Computing a block ...");
-        //lastBlock: "7e49c83b400ab55e405f7396162309c0e311ee0eba248f960878c1d729987ff1", requiredDifficulty: 8, rgb: 0
+        // responseJson.rgb wil be ignored
 
-        throw "NOT IMPLEMENTED";
+        var lastBlockBytesList = hexToByteList(responseJson.lastBlock);
+        var payloadBytesList = computePayload(formdata);
+        // responseJson.requiredDifficulty already contains pixelPenalty:
+        var requiredDifficulty = responseJson.requiredDifficulty + formdata.newdiff;
+
+        var nonceBytesList = [0, 0, 0, 0, 0, 0, 0, 0]
+        var nonceHex = "0000000000000000"
+        var nonceWorks = checkBlock(lastBlockBytesList, nonceBytesList, payloadBytesList, requiredDifficulty);
+        if (!nonceWorks) {
+            updateFormStatus("Nope, would need to try a different nonce :(");
+            throw 'Retry NOT IMPLEMENTED'; // FIXME: Try more than once. Duh.
+        } else {
+            updateFormStatus("This might work!");
+            return fetch(
+                new Request(pixelUrl, {method: 'POST', body:
+                    `{"lastblock": "${responseJson.lastBlock}", "none": "${nonceHex}", "newDifficulty": ${formdata.newdiff}, "rgb": ${formdata.rgb}}`})
+            );
+        }
+    }).then(response => {
+        console.log(response);
+        // FIXME: Handle 429 and 400 here!
+        return response.json();
+    }).then(responseJson => {
+        console.log("POST result:");
+        console.log(responseJson);
+        updateFormStatus("Done, perhaps");
+        throw "Not implemented yet";
     }).then(_ => {
         updateFormStatus("DONE, YESYESYES! :D");
     }).catch(error => {

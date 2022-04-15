@@ -210,17 +210,23 @@ def api_pixel(x=-1, y=-1):
     # Alrighty!  Let's see whether this makes sense:
     if flask.request.content_length > 200:
         # Requests have no business being that long.
+        print('too long')
         flask.abort(400)
     req = flask.request.get_json(force=True)
     if not isinstance(req, dict):
+        print('not dict')
         flask.abort(400)
     r_last_block_hex = req.pop('lastBlock', None)
     r_nonce = req.pop('nonce', None)
     r_new_diff = req.pop('newDifficulty', None)
     r_rgb = req.pop('rgb', None)
     if req or not isinstance(r_last_block_hex, str) or not isinstance(r_nonce, str) or not isinstance(r_new_diff, int) or not isinstance(r_rgb, int):
+        print('weird', req, r_last_block_hex, r_nonce, r_new_diff, r_rgb)
+        weird {'lastblock': '0b547de97326df3e160682425ada6423ec6220e96b3fafa15ce403e923d4bd19', 'none': '0000000000000000'} None None 0 13132800
+
         flask.abort(400)
     if r_new_diff < 0 or r_new_diff >= 64 or r_rgb < 0 or r_rgb > 0xFFFFFF:
+        print('weird2')
         flask.abort(400)
     if r_last_block_hex != bytes_to_hex(px.last_block_bytes):
         response.status_code = 409

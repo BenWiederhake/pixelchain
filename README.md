@@ -1,3 +1,7 @@
+# Abandoned
+
+This project uses a complex API. Turns out, that was overengineered, and I had more fun with a simpler API instead: [project pixelcrush](https://github.com/BenWiederhake/pixelcrush/).
+
 # pixelchain
 
 > Colors in a block-ish chain.  Like pixelflut, but slower.
